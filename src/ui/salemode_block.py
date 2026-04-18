@@ -12,19 +12,16 @@ class SalemodeBlock(QWidget):
 
     def set_ui(self):
         layout1 = QHBoxLayout()
-        self.sale_mode = ['器械', '寄售', '折让', '赠送', '换货']
-        self.sale_mode_btns = []
         
-
-        for i in self.sale_mode:
-            btn = QRadioButton(i)
-            self.sale_mode_btns.append(btn)
+        for item in ['器械', '寄售', '折让', '赠送', '换货']:
+            btn = QRadioButton(item)
             layout1.addWidget(btn)
 
         layout2 = QHBoxLayout()
         layout2.addWidget(QLabel("产品单、赠品单："))
-        layout2.addWidget(QRadioButton("分开制作"))
-        layout2.addWidget(QRadioButton("合并制作"))
+        for item in ['分开制作', '合并制作']:
+            btn = QRadioButton(item)
+            layout2.addWidget(btn)
         
         layout = QVBoxLayout(self)
         layout.addLayout(layout1)
