@@ -10,25 +10,25 @@ hosp_init ={
         }
 
 class DictManager:
-    def __init__(self, file_path:str, init_mapping:dict, parent=None):
-        super().__init__(parent)
+    def __init__(self, file_path:str, init_dict:dict):
+        super().__init__()
         self.file_path = Path(file_path)
-        self.init_mapping = init_mapping
+        self.dict = init_dict
         self.dict = self.load()
-        self.dict = self.rank()
+        self.rank()
 
     def load(self):
         try:
             with open(self.file_path, "r", encoding="utf-8") as f:
                 return json.load(f)
         except FileNotFoundError:
-            with open(self.init_mapping, "w", encoding="utf-8") as f:
+            with open(self.file_path, "w", encoding="utf-8") as f:
                 json.dump(self.dict, f, ensure_ascii=False, indent=4)
-                return self.init_mapping
+                return self.dict
     
     def rank(self):
-        self.dict = dict(sorted(self.dict.items(), key = lambda x: x[0]))
-
+        self.dict = dict(sorted(self.dict.items(), key = lambda item: item[0]))
+                    
     def save(self):
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(self.dict, f, ensure_ascii=False, indent=4)

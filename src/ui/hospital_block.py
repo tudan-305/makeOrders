@@ -9,7 +9,7 @@ class AddhospDialog(QDialog):
     final_report = Signal(int)
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._was_modified = False
+        self._was_modified = 0
         self.setup_ui()
         self.connect_signals()
 
@@ -18,15 +18,19 @@ class AddhospDialog(QDialog):
         self.resize(500, 720)
         
         row1 = QHBoxLayout()
-        self.nickname = QLineEdit(PlaceholderText="医院简称")
+        self.nickname = QLineEdit(placeholderText="医院简称")
         self.nickname.setFixedWidth(80)
-        self.holename = QLineEdit(PlaceholderText="医院全称")
+        self.holename = QLineEdit(placeholderText="医院全称")
         self.holename.setFixedWidth(240)
+        self.clear_btn = QPushButton("清除")
+        self.clear_btn.setFixedWidth(50)
+        self.clear_btn.setEnabled(False)
         self.add_btn = QPushButton("添加医院")
         self.add_btn.setFixedWidth(80)
         self.add_btn.setEnabled(False)
         row1.addWidget(self.nickname)
         row1.addWidget(self.holename)
+        row1.addWidget(self.clear_btn)
         row1.addWidget(self.add_btn)
         row2 = QHBoxLayout()
         self.show_status = QLabel("")
@@ -41,12 +45,6 @@ class AddhospDialog(QDialog):
         layout.addLayout(row1)
         layout.addLayout(row2)
         layout.addLayout(row3)
-    
-    def connect_signals(self):
-        self.nickname.textChanged.connect(self.check_inputs)
-        self.holename.textChanged.connect(self.check_inputs)
-        self.add_btn.clicked.connect(self.on_addbtn_clicked)
-        hosp_mapping.dict_additem.connect(self.on_dict_additem)
 
     def set_table(self):
         self.table.setRowCount(len(hosp_mapping.dict))
@@ -56,24 +54,38 @@ class AddhospDialog(QDialog):
         for row, (key, value) in enumerate(hosp_mapping.dict.items()):
             self.table.setItem(row, 0, QTableWidgetItem(key))
             self.table.setItem(row, 1, QTableWidgetItem(value))
-    
+
+    def connect_signals(self):
+        self.nickname.textChanged.connect(self.check_inputs)
+        self.holename.textChanged.connect(self.check_inputs)
+        self.clear_btn.clicked.connect(self.on_clearbtn_clicked)
+        self.add_btn.clicked.connect(self.on_addbtn_clicked)
+        
     @Slot()
     def check_inputs(self):
-        ready = bool(self.nickname.text().strip()) and bool(self.holename.text().strip())
-        self.add_btn.setEnabled(ready)
+        add_ready = bool(self.nickname.text().strip()) and bool(self.holename.text().strip())
+        clear_ready = bool(self.nickname.text().strip()) or bool(self.holename.text().strip())
+        self.add_btn.setEnabled(add_ready)
+        self.clear_btn.setEnabled(clear_ready)
+
+    @Slot()
+    def on_clearbtn_clicked(self):
+        self.nickname.clear()
+        self.holename.clear()
 
     @Slot()
     def on_addbtn_clicked(self):
-        hosp_mapping.add(self.nickname.text(), self.holename.text())
-    
-    @Slot()
-    def on_dict_additem(self, statu: bool, notice: str):
-        if statu == True:
-            self._was_modified = True
-            self.show_status.setStyleSheet("color: green")
+        dict_added = hosp_mapping.add(self.nickname.text(), self.holename.text())
+        if dict_added:
+            hosp_mapping.rank()
+            hosp_mapping.save()
+            self._was_modified += 1
+            self.show_status.setStyleSheet("color:green")
+            notice = "添加成功"
             self.set_table()
         else:
-            self.show_status.setStyleSheet("color: red")
+            self.show_status.setStyleSheet("color:red")
+            notice = f"添加失败，{self.nickname.text()}已存在"
         self.show_status.setText(notice)
 
         
@@ -127,10 +139,10 @@ class HospitalBlock(QWidget):
     def on_index_changed(self, index):
         data = "" if index == -1 else self.hosp_combo.currentData()
         self.hosp_holename_lbl.setText(data)
-        self.hosp_selected[str].emit(data)
 
     @Slot()
     def open_dialog(self):
         dialog = AddhospDialog()
         result = dialog.exec()
-        print(result)
+        if dialog._was_modified > 0:
+            self.refresh_hosp_combo()
