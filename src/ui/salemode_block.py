@@ -19,25 +19,31 @@ class SalemodeBlock(QWidget):
     def set_ui(self):
         # 创建QRadioButton放入QButtonGroup并放入layout
         row1 = QHBoxLayout()
-        row1.addWidget(QLabel("供应商："))
+        row1.addWidget(QLabel("供  应  商：", fixedWidth=65))
         for num, i in enumerate(self.suppliers.keys(), 1):
             btn = QRadioButton(i)
+            btn.setFixedWidth(80)
             self.suppliers_group.addButton(btn, num)
             row1.addWidget(btn)
+        row1.addStretch()
 
         row2 = QHBoxLayout()
+        row2.addWidget(QLabel("出库方式：", fixedWidth=65))
         for i in self.sale_modes:
             btn = QRadioButton(i)
+            btn.setFixedWidth(55)
             self.salemodes_group.addButton(btn)
             row2.addWidget(btn)
+        row2.addStretch()
 
         row3 = QHBoxLayout()
-        row3.addWidget(QLabel("赠品单："))
+        row3.addWidget(QLabel("赠  品  单：", fixedWidth=65))
         for i in self.order_modes:
             btn = QRadioButton(i)
+            btn.setFixedWidth(80)
             self.ordermodes_group.addButton(btn)
             row3.addWidget(btn)
-        
+        row3.addStretch()
         
         layout = QVBoxLayout(self)
         layout.addLayout(row1)

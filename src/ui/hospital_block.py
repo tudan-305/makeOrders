@@ -102,10 +102,10 @@ class HospitalBlock(QWidget):
         #第一行：医院简称，清空按钮，添加医院
         row1 = QHBoxLayout()
         self.hosp_combo = QComboBox(placeholderText = "选择医院")
-        self.hosp_combo.setFixedWidth(150)
         self.clear_btn = QPushButton("清除")
         self.clear_btn.setFixedWidth(50)
         self.add_hosp_btn = QPushButton("添加医院")
+        self.add_hosp_btn.setFixedWidth(100)
         row1.addWidget(self.hosp_combo)
         row1.addWidget(self.clear_btn)
         row1.addWidget(self.add_hosp_btn)
