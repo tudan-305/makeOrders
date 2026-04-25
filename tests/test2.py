@@ -88,6 +88,7 @@ class ProductApp(QMainWindow):
 
             # 可选：滚动到新行
             self.table.scrollToBottom()
+            
 
         # 清空输入框，准备下次扫码
         self.scan_input.clear()

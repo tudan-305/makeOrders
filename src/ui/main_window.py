@@ -16,7 +16,7 @@ class Mainwindow(QWidget):
     
 
     def set_layout(self):
-        # self.setFixedSize(400, 200)
+        self.setFixedSize(700, 800)
         main_layout = QVBoxLayout(self)
         
         # 区块1:选择医院
@@ -37,6 +37,16 @@ class Mainwindow(QWidget):
         self.product_block = ProductBlock()
         main_layout.addWidget(self.product_block)
 
+        
+        # 最终确认
+        self.final_confirm = QPushButton("信息无误，确认制单")
+        self.final_confirm.setFixedWidth(200)
+        self.final_confirm.setStyleSheet("background-color:blue;foreground-color:white")
+        final_layout = QHBoxLayout(self)
+        final_layout.addStretch()
+        final_layout.addWidget(self.final_confirm)
+        final_layout.addStretch()
+        main_layout.addLayout(final_layout)
     def connect_cross_signals(self):
         pass
     
