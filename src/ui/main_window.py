@@ -16,7 +16,7 @@ class Mainwindow(QWidget):
     
 
     def set_layout(self):
-        self.setFixedSize(700, 800)
+        self.setFixedSize(600, 650)
         main_layout = QVBoxLayout(self)
         
         # 区块1:选择医院
@@ -40,9 +40,8 @@ class Mainwindow(QWidget):
         
         # 最终确认
         self.final_confirm = QPushButton("信息无误，确认制单")
-        self.final_confirm.setFixedWidth(200)
-        self.final_confirm.setStyleSheet("background-color:blue;foreground-color:white")
-        final_layout = QHBoxLayout(self)
+        self.final_confirm.setFixedWidth(180)
+        final_layout = QHBoxLayout()
         final_layout.addStretch()
         final_layout.addWidget(self.final_confirm)
         final_layout.addStretch()
