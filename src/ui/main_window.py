@@ -4,7 +4,7 @@ from src.ui.divider_maker import create_line
 from src.ui.hospital_block import HospitalBlock
 from src.ui.salemode_block import SalemodeBlock
 from src.ui.product_block import ProductBlock
-
+import src.models.make_sheet
 
 
 class Mainwindow(QWidget):
@@ -38,20 +38,20 @@ class Mainwindow(QWidget):
         main_layout.addWidget(self.product_block)
 
         
-        # 最终确认
+        # 最终确认按钮，生成表格
         self.final_confirm = QPushButton("信息无误，确认制单")
         self.final_confirm.setFixedWidth(180)
+
         final_layout = QHBoxLayout()
         final_layout.addStretch()
         final_layout.addWidget(self.final_confirm)
         final_layout.addStretch()
         main_layout.addLayout(final_layout)
+
     def connect_cross_signals(self):
+        self.final_confirm.clicked.connect(self.on_final_confirm_clicked)
+
+    @Slot()
+    def on_final_confirm_clicked(self):
         pass
     
-    @Slot()
-    def on_hosp_selected(self, text):
-        print(f"全名是：{text}")
-    
-
-

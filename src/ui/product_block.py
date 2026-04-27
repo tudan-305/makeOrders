@@ -115,7 +115,33 @@ class ProductBlock(QWidget):
 
     @Slot()
     def delete_selected_product(self):
-        pass
+        """删除当前产品行"""
 
-    def refresh_row_mapping(self):
-        pass
+        current_row = self.table.currentRow()
+        if current_row < 0:
+            QMessageBox.information(self, "提示", "请先选中要删除产品行")
+            return
+        
+        product_message = self.table.item(current_row, 0).text() + "\n" + \
+                          "批号/序列号：" + self.table.item(current_row, 2).text()
+        product_udi = self.table.item(current_row, 1).text()
+
+        reply = QMessageBox.question(self, "确认删除", f"是否删除产品：\n'{product_message}'",
+                                     QMessageBox.Yes | QMessageBox.No)
+        
+        if reply != QMessageBox.Yes:
+            return
+        
+        # 移除表格行
+        self.table.removeRow(current_row)
+        # 移除字典项
+        del self.product_row_mapping[product_udi]
+
+        self._refresh_row_mapping(current_row)
+
+    def _refresh_row_mapping(self, row):
+        """遍历product_row_mapping, 将所有比删除行大的行都减1"""
+        for key, (_, n) in self.product_row_mapping.items():
+            if n > row:
+                self.product_row_mapping[key][1] -= 1
+        

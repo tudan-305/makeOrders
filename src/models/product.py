@@ -26,9 +26,9 @@ class Product:
         self.serial_number  = data.get("21")                                          # 序列号
         self.expiry         = data.get("17")                                          # 失效日期
         self.prod_date      = data.get("11")                                          # 生产日期
-        self.unit           = None                                                    # 单位
+        self.unit           = DEVICES_TABLE.at[self.gtin, "单位"]                      # 单位
         self.unit_price     = DEVICES_TABLE.at[self.gtin, "单价"]                      # 单价
-        self.amout          = 0                                                       # 总价
+        self.amout          = 0.0                                                       # 总价
         return True
     
 
