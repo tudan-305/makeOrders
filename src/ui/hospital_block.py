@@ -14,6 +14,7 @@ class AddhospDialog(QDialog):
         self.connect_signals()
 
     def setup_ui(self):
+        """添加医院窗口"""
         self.setWindowTitle("医院管理")
         self.resize(500, 720)
         
@@ -99,7 +100,7 @@ class HospitalBlock(QWidget):
         self.connect_signals()
 
     def setup_ui(self):
-        #第一行：医院简称，清空按钮，添加医院
+        #第一行：医院简称，清空按钮，添加按钮
         row1 = QHBoxLayout()
         self.hosp_combo = QComboBox(placeholderText = "选择医院")
         self.clear_btn = QPushButton("清除")
@@ -122,6 +123,7 @@ class HospitalBlock(QWidget):
         layout.addLayout(row2)
     
     def refresh_hosp_combo(self):
+        """清空，然后重新添加dict里面的每项到qcombo，得到刷新效果"""
         self.hosp_combo.clear()
         for nickname, holename in hosp_mapping.dict.items():
             self.hosp_combo.addItem(nickname, holename)

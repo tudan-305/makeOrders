@@ -20,15 +20,16 @@ class Product:
         self.category       = DEVICES_TABLE.at[self.gtin, "产品类别"]                   # 类别
         self.name           = DEVICES_TABLE.at[self.gtin, "产品名称/通用名称"]          # 产品名称    
         self.model_No       = DEVICES_TABLE.at[self.gtin, "规格型号"]                   # 规格型号
-        self.company        = DEVICES_TABLE.at[self.gtin, "医疗器械注册人/备案人名称"]      # 规格型号 
+        self.company        = DEVICES_TABLE.at[self.gtin, "医疗器械注册人/备案人名称"]      # 生产企业 
         self.reg_No         = DEVICES_TABLE.at[self.gtin, "注册证编号或者备案凭证编号"]     # 注册证号
         self.batch_number   = data.get("10")                                          # 批号
         self.serial_number  = data.get("21")                                          # 序列号
         self.expiry         = data.get("17")                                          # 失效日期
         self.prod_date      = data.get("11")                                          # 生产日期
+        self.quantity       = 0                                                       # 数量
         self.unit           = DEVICES_TABLE.at[self.gtin, "单位"]                      # 单位
         self.unit_price     = DEVICES_TABLE.at[self.gtin, "单价"]                      # 单价
-        self.amout          = 0.0                                                       # 总价
+        self.amount          = 0.0                                                       # 总价
         return True
     
 

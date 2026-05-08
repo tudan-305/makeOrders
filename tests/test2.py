@@ -1,14 +1,15 @@
-from openpyxl import Workbook
-from pathlib import Path
 from openpyxl import load_workbook
-savepath = Path.home() / "Desktop/abc.xlsx"
-
-wb = load_workbook(savepath)
+from openpyxl.styles import Border, Side
+from openpyxl.worksheet.cell_range import CellRange
+wb = load_workbook("gii.xlsx")
 ws = wb.active
 
-ws['a1'] = '123'
-ws['b2'] = 'kkkk'
-ws.append()
-wb.save(savepath)
-
-
+myRange = CellRange("a22:c34")
+myBorder = Border(
+    left=Side(style="thick", color="000000"),
+    right=Side(style="thick", color="000000"),
+    top=Side(style="thick", color="000000"),
+    bottom=Side(style="thick", color="000000")
+)
+print(myRange.bounds)
+wb.save("kk.xlsx")

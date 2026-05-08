@@ -12,7 +12,7 @@ class ProductBlock(QWidget):
         self.setup_ui()
         self.connect_signals()
         # 存储产品名称与行号的映射，方便快速查找
-        self.product_row_mapping = {}
+        self.product_row_mapping = {} # 字典格式为{"udi":["产品实例", "行号"]}
 
     def setup_ui(self):
         # 顶部：扫码输入框(带说明) + 手动添加按钮
@@ -55,7 +55,7 @@ class ProductBlock(QWidget):
             
             # 检查新添加是否已存在
             if product_udi in self.product_row_mapping:
-                # 获取产品行号（字典格式为{"udi":["产品实例", "行号"]}
+                # 获取产品行号  字典格式为{"udi":["产品实例", "行号"]}
                 row = self.product_row_mapping[product_udi][1]
                 # 获取当前数量控件的值并增加1
                 spin_box = self.table.cellWidget(row, 3)
@@ -98,20 +98,24 @@ class ProductBlock(QWidget):
                 spin_box.setMinimum(1)
                 spin_box.setMaximum(99999)
                 spin_box.setValue(1)
-                # 数量改变时，触发后续逻辑，比如重新计算总价格
-                spin_box.valueChanged.connect(lambda value, r=row: self.on_quantity_changed(value, r))
-
+                # 数量改变时，触发后续逻辑，如重新计算数量，价格
+                spin_box.valueChanged.connect(lambda value, udi=product_udi: (print(f"lambda fired:{value}, {udi}"), self.on_quantity_changed(value, udi)))
+                
+                # 添加到字典，记录产品、行号映射
+                self.product_row_mapping[product_udi] = [new_product, row+1]
+                # 先手动触发一次，更新字典里的数量
+                self.on_quantity_changed(1, product_udi)
                 # 添加部件
                 self.table.setCellWidget(row, 3, spin_box)
-                # 记录映射
-                self.product_row_mapping[product_udi] = [new_product, row]
+                
+                
         finally: 
             # 清空输入框，准备下次输入
             self.scan_input.clear()
 
     @Slot()
-    def on_quantity_changed(self, new_value, row):
-        pass
+    def on_quantity_changed(self, new_value, udi):
+        self.product_row_mapping[udi][0].quantity = new_value
 
     @Slot()
     def delete_selected_product(self):
@@ -136,7 +140,7 @@ class ProductBlock(QWidget):
         self.table.removeRow(current_row)
         # 移除字典项
         del self.product_row_mapping[product_udi]
-
+        # 刷新行号
         self._refresh_row_mapping(current_row)
 
     def _refresh_row_mapping(self, row):
