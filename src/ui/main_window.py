@@ -98,4 +98,3 @@ class Mainwindow(QWidget):
         temp_dict["orderdate"] = date.today()
         return temp_dict
     
-    
