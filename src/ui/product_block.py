@@ -1,3 +1,4 @@
+from decimal import Decimal
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,QPushButton, QLabel, QLineEdit,
     QComboBox, QRadioButton, QTableWidget, QTableWidgetItem, QMessageBox,
@@ -32,12 +33,21 @@ class ProductBlock(QWidget):
         # self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        # 底部：删除选中行按钮
+        # 底部1：总数，总金额
+        self.quantity, self.amount = 0, Decimal(0.0)
+        self.count_label = QLabel(f"总数：{self.quantity}")
+        self.amount_label = QLabel(f"总金额: {self.amount}")
+        layout_h1 = QHBoxLayout()
+        layout_h1.addWidget(self.count_label)
+        layout_h1.addWidget(self.amount_label)
+        layout_h1.addStretch()
+        # 底部2:删除选中行按钮
         self.delete_btn = QPushButton("删除选中商品")
         
         layout = QVBoxLayout(self)
         layout.addLayout(input_layout)
         layout.addWidget(self.table)
+        layout.addLayout(layout_h1)
         layout.addWidget(self.delete_btn)
 
     def connect_signals(self):
@@ -99,8 +109,9 @@ class ProductBlock(QWidget):
                 spin_box.setMaximum(99999)
                 spin_box.setValue(1)
                 # 数量改变时，触发后续逻辑，如重新计算数量，价格
-                spin_box.valueChanged.connect(lambda value, udi=product_udi: (print(f"lambda fired:{value}, {udi}"), self.on_quantity_changed(value, udi)))
-                
+                spin_box.valueChanged.connect(
+                    lambda value, udi=product_udi:\
+                    (print(f"lambda fired:{value}, {udi}"),self.on_quantity_changed(value, udi)))
                 # 添加到字典，记录产品、行号映射
                 self.product_row_mapping[product_udi] = [new_product, row+1]
                 # 先手动触发一次，更新字典里的数量
@@ -114,8 +125,11 @@ class ProductBlock(QWidget):
             self.scan_input.clear()
 
     @Slot()
-    def on_quantity_changed(self, new_value, udi):
-        self.product_row_mapping[udi][0].quantity = new_value
+    def on_quantity_changed(self, new_quantity, udi):
+        prod = self.product_row_mapping[udi]
+        prod[0].quantity = new_quantity
+        prod[0].refresh_amount()
+        self.amount_label.setText(f"总金额: {str(self.calc_amount())}")
 
     @Slot()
     def delete_selected_product(self):
@@ -148,4 +162,9 @@ class ProductBlock(QWidget):
         for key, (_, n) in self.product_row_mapping.items():
             if n > row:
                 self.product_row_mapping[key][1] -= 1
-        
+
+    def calc_amount(self):
+        amount = Decimal(0.0)
+        for value in self.product_row_mapping.values():
+            amount += value[0].amount
+        return amount

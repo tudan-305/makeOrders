@@ -2,7 +2,7 @@ from datetime import date
 from pathlib import Path
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                                QMessageBox)
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, QTimer
 from src.ui.divider_maker import create_line
 from src.ui.hospital_block import HospitalBlock
 from src.ui.salemode_block import SalemodeBlock
@@ -54,27 +54,33 @@ class Mainwindow(QWidget):
 
     @Slot()
     def on_final_confirm_clicked(self):
+        """最终确认按钮按下后生成表格"""
         # 检查界面上数据完整性,若完整则获取,否则退出函数
         if not self.check_materials():
             return
-        # 读入模板
-        self.new_excel = self.create_excel()
-
-        # 从界面读取表格表头信息放入字典
-        self.header_dict = self.get_header()
-        # 将字典写入文件头部信息
-        self.new_excel.write_header(self.header_dict)
-
-        # 写入产品信息
-        self.new_excel.write_body(self.product_block.product_row_mapping)
-
-        # 默认保存表格到桌面
-        self.new_excel.save()
         
+        try:
+            # 读入模板
+            self.new_excel = self.create_excel()
+            # 从界面读取表格表头信息放入字典
+            self.header_dict = self.get_header()
+            # 将字典写入文件头部信息:w
+            self.new_excel.write_header(self.header_dict)
+            # 写入产品信息
+            self.new_excel.write_body(self.product_block.product_row_mapping)
+            # 默认保存表格到桌面
+            self.new_excel.save(self.hosp_block.hosp_combo.currentText())
+            # 运行完成，弹出提示
+            self.show_success_msg()
+
+        except IOError as e:
+            QMessageBox.critical(self, "错误", f"错误信息：{e}")
+        except FileNotFoundError as e:
+            QMessageBox.critical(self, "错误", f"错误信息：{e}")
+        except Exception as e:
+            QMessageBox.critical(self, "错误", f"错误信息：{e}")
         
-        # 获取body的写入位置
-        # 将数据写入对应位置
-        # 保存关闭文件
+
 
     def create_excel(self):
         return ExcelManager(Path(config.TEMPLETES_FPATH) / f"{self.hosp_block.hosp_combo.currentText()}模板.xlsx")
@@ -98,3 +104,12 @@ class Mainwindow(QWidget):
         temp_dict["orderdate"] = date.today()
         return temp_dict
     
+    def show_success_msg(self):
+        msg = QMessageBox(self)
+        msg.setWindowTitle("制单完成")
+        msg.setText("表格生成在桌面")
+        msg.setIcon(QMessageBox.Information)
+        # 设置定时器：3000毫秒后执行 msg.close() 单次触发 (SingleShot)
+        QTimer.singleShot(1000, msg.close)
+        # 运行，使用exec() 阻塞主窗口，使用 show() 为非阻塞
+        msg.exec()

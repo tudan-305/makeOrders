@@ -25,6 +25,7 @@ class SalemodeBlock(QWidget):
             btn.setFixedWidth(80)
             self.suppliers_group.addButton(btn, num)
             row1.addWidget(btn)
+        # 向左靠
         row1.addStretch()
 
         row2 = QHBoxLayout()

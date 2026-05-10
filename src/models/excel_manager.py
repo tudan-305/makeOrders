@@ -41,7 +41,7 @@ class ExcelManager():
         # 合并单元格
         self.merge_cells(merged_info)
         # 设置单元格边框
-        self.set_border(first_row, first_row + dict_len, 1, self.ws1.max_column)
+        self.set_border_alignment(first_row, first_row + dict_len, 1, self.ws1.max_column)
 
         return
     
@@ -82,52 +82,58 @@ class ExcelManager():
     def write_product_messages(self, body_first_row:int, append_row_count:int, product_dict:dict):
         """产品信息写入表格"""
 
-        # 标题行
+        # 找到标题行
         title_row = body_first_row - 1
-        # {标题名：对应列号}
+        # 将所有标题名存入字典{标题名：对应列号}
         title_names_positions = {}
         for row in self.ws1.iter_rows(min_row = title_row, max_row = title_row):
             for cell in row:
                 title_names_positions[cell.value] = cell.column
-        # 找到标题行
+        # 需要遍历存入的内容行
         rows = self.ws1.iter_rows(body_first_row, body_first_row + append_row_count)
         # 逐行逐列+产品字典类里的逐个属性写入
         for row, (_, [prod, serial]) in zip(rows, product_dict.items()):
             for cell in row:
-                # 判断标题，写入对应数据
+                # 判断标题行的每个单元格，在下方写入对应数据
                 title = self.ws1.cell(title_row, cell.column).value
-                match title:
-                    case _ if "序号" in title:
-                        cell.value = serial
-                    case _ if "商品名称" in title:
-                        cell.value = prod.name
-                    case _ if "规格" in title:
-                        cell.value = prod.model_No
-                    case _ if "生产企业" in title:
-                        cell.value = prod.company
-                    case _ if "注册证" in title:
-                        cell.value = prod.reg_No
-                    case _ if "批号/序列号" in title:
-                        cell.value = prod.serial_number if prod.serial_number else prod.batch_number
-                    case _ if "生产" in title:
-                        cell.value = prod.prod_date
-                    case _ if "有效期" in title:
-                        cell.value = prod.expiry
-                    case _ if "数量" in title:
-                        cell.value = prod.quantity
-                    case _ if "单位" in title:
-                        cell.value = prod.unit
-                    case _ if "存储条件" in title:
-                        cell.value = "常温"
-                    case _ if "单价" in title:
-                        cell.value = prod.unit_price if prod.unit_price else "请先设置产品单价"
-                    case _ if "金额" in title:
-                        cell.value = prod.unit * prod.unit_price if prod.unit_price else ""
-                    case _:
-                        cell.value = None
-    
-
-
+                cell.value = self.match_prod_info(title, prod, serial)
+                
+    def match_prod_info(self, title, prod, serial):
+        """根据标题，来返回对应产品"""
+        match title:
+            case _ if "序号" in title:
+                result = serial
+            case _ if "商品名称" in title:
+                result = prod.name if prod.name else "请设置商品名称"
+            case _ if "规格" in title:
+                result = prod.model_No if prod.model_No else "请设置规格"
+            case _ if "生产企业" in title:
+                result = prod.company if prod.company else "请设置生产企业"
+            case _ if "注册证" in title:
+                result = prod.reg_No if prod.reg_No else "请设置注册证"
+            case _ if "批号/序列号" in title:
+                result = prod.serial_number if prod.serial_number else prod.batch_number
+            case _ if "生产" in title:
+                if prod.prod_date:
+                    date = str(prod.prod_date)
+                    result = f"20{date[:2]}-{date[2:4]}-{date[4:]}"
+            case _ if "有效期" in title:
+                if prod.expiry:
+                    date = str(prod.expiry)
+                    result = f"20{date[:2]}-{date[2:4]}-{date[4:]}"
+            case _ if "数量" in title:
+                result = prod.quantity
+            case _ if "单位" in title:
+                result = prod.unit if prod.unit else "请设置单位"
+            case _ if "储存条件" in title:
+                result = "常温"
+            case _ if "单价" in title:
+                result = prod.unit_price if prod.unit_price else "请设置单价"
+            case _ if "金额" in title:
+                result = prod.amount
+            case _:
+                result = ""
+        return result
 
     def merge_cells(self, merge_list: list):
         """合并单元格"""
@@ -135,8 +141,8 @@ class ExcelManager():
             self.ws1.merge_cells(start_row=info["min_row"], start_column=info["min_col"],
                                  end_row=info["max_row"], end_column=info["max_col"])
 
-    def set_border(self, start_row: int, end_row: int, start_col: int, end_col: int):
-        """设置单元格边框"""
+    def set_border_alignment(self, start_row: int, end_row: int, start_col: int, end_col: int):
+        """设置单元格边框、内容水平垂直居中"""
         thin_border = Border(
             left    = Side(style='thin', color='000000'),
             right   = Side(style='thin', color='000000'),
@@ -149,6 +155,6 @@ class ExcelManager():
                 cell.border = thin_border
                 cell.alignment = Alignment(horizontal="center", vertical="center")
 
-    def save(self):
-        self.wb.save(Path.home() / "Desktop/pick.xlsx")
+    def save(self, file_name):
+        self.wb.save(Path.home() / f"Desktop/{file_name}.xlsx")
 
