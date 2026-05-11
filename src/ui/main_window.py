@@ -102,6 +102,9 @@ class Mainwindow(QWidget):
         temp_dict["salemode"] = self.salemode_block.salemodes_group.checkedButton().text() 
         temp_dict["ordermode"] = self.salemode_block.ordermodes_group.checkedButton().text() 
         temp_dict["orderdate"] = date.today()
+        temp_dict["amount"] = self.product_block.amount
+        temp_dict["amount_cht"] = self.product_block.amount
+        temp_dict["count"] = self.product_block.count
         return temp_dict
     
     def show_success_msg(self):
@@ -110,6 +113,6 @@ class Mainwindow(QWidget):
         msg.setText("表格生成在桌面")
         msg.setIcon(QMessageBox.Information)
         # 设置定时器：3000毫秒后执行 msg.close() 单次触发 (SingleShot)
-        QTimer.singleShot(1000, msg.close)
+        QTimer.singleShot(800, msg.close)
         # 运行，使用exec() 阻塞主窗口，使用 show() 为非阻塞
         msg.exec()

@@ -34,8 +34,9 @@ class ProductBlock(QWidget):
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
         # 底部1：总数，总金额
-        self.quantity, self.amount = 0, Decimal(0.0)
-        self.count_label = QLabel(f"总数：{self.quantity}")
+        self.amount = Decimal("0.0")
+        self.count = 0
+        self.count_label = QLabel(f"总数: {self.count}")
         self.amount_label = QLabel(f"总金额: {self.amount}")
         layout_h1 = QHBoxLayout()
         layout_h1.addWidget(self.count_label)
@@ -54,6 +55,7 @@ class ProductBlock(QWidget):
         self.scan_input.returnPressed.connect(self.add_product_from_scan)
         self.add_btn.clicked.connect(self.add_product_from_scan)
         self.delete_btn.clicked.connect(self.delete_selected_product)
+        self.table.model().rowsRemoved.connect(self.refresh_amount)
 
     @Slot()
     def add_product_from_scan(self):
@@ -68,7 +70,7 @@ class ProductBlock(QWidget):
                 # 获取产品行号  字典格式为{"udi":["产品实例", "行号"]}
                 row = self.product_row_mapping[product_udi][1]
                 # 获取当前数量控件的值并增加1
-                spin_box = self.table.cellWidget(row, 3)
+                spin_box = self.table.cellWidget(row-1, 3)
                 # 若有这个控件，数量+1
                 if spin_box:
                     new_quantity = spin_box.value() + 1
@@ -87,7 +89,7 @@ class ProductBlock(QWidget):
                 column1_text = f"{new_product.model_No:<18}{new_product.name}"
                 column2_text = f"{product_udi}"
                 column3_text = f"{new_product.serial_number if new_product.serial_number else new_product.batch_number}"
-                # 设置悬停显示文本
+                # 设置单元格，并且悬停显示文本
                 new_item1 = QTableWidgetItem(column1_text)
                 new_item1.setToolTip(column1_text)
                 new_item2 = QTableWidgetItem(column2_text)
@@ -99,6 +101,7 @@ class ProductBlock(QWidget):
                 new_item1.setFlags(new_item1.flags() & ~Qt.ItemIsEditable)
                 new_item2.setFlags(new_item2.flags() & ~Qt.ItemIsEditable)
                 new_item3.setFlags(new_item3.flags() & ~Qt.ItemIsEditable)
+                
                 self.table.setItem(row, 0, new_item1)
                 self.table.setItem(row, 1, new_item2)
                 self.table.setItem(row, 2, new_item3)
@@ -107,29 +110,25 @@ class ProductBlock(QWidget):
                 spin_box = QSpinBox()
                 spin_box.setMinimum(1)
                 spin_box.setMaximum(99999)
-                spin_box.setValue(1)
-                # 数量改变时，触发后续逻辑，如重新计算数量，价格
-                spin_box.valueChanged.connect(
-                    lambda value, udi=product_udi:\
-                    (print(f"lambda fired:{value}, {udi}"),self.on_quantity_changed(value, udi)))
+                #设定任意不为1的初始值，下面重设一次数量触发信号，更新数量显示
+                spin_box.setValue(99999)
                 # 添加到字典，记录产品、行号映射
                 self.product_row_mapping[product_udi] = [new_product, row+1]
-                # 先手动触发一次，更新字典里的数量
-                self.on_quantity_changed(1, product_udi)
-                # 添加部件
+                # 数量改变时，触发后续逻辑，如重新计算数量，价格
+                spin_box.valueChanged.connect(lambda value, udi=product_udi:(print(f"lambda fired:{value}, {udi}"),self.on_quantity_changed(value, udi)))
+                spin_box.valueChanged.connect(self.refresh_amount)
+                spin_box.setValue(1)
+                # 部件放入单元格
                 self.table.setCellWidget(row, 3, spin_box)
-                
-                
-        finally: 
+                      
+        finally:
             # 清空输入框，准备下次输入
             self.scan_input.clear()
 
     @Slot()
     def on_quantity_changed(self, new_quantity, udi):
-        prod = self.product_row_mapping[udi]
-        prod[0].quantity = new_quantity
-        prod[0].refresh_amount()
-        self.amount_label.setText(f"总金额: {str(self.calc_amount())}")
+        self.product_row_mapping[udi][0].quantity = new_quantity
+        self.product_row_mapping[udi][0].refresh_amount()
 
     @Slot()
     def delete_selected_product(self):
@@ -150,12 +149,12 @@ class ProductBlock(QWidget):
         if reply != QMessageBox.Yes:
             return
         
-        # 移除表格行
-        self.table.removeRow(current_row)
         # 移除字典项
         del self.product_row_mapping[product_udi]
-        # 刷新行号
+        # 刷新字典内记录的行号
         self._refresh_row_mapping(current_row)
+        # 移除表格行
+        self.table.removeRow(current_row)
 
     def _refresh_row_mapping(self, row):
         """遍历product_row_mapping, 将所有比删除行大的行都减1"""
@@ -163,8 +162,13 @@ class ProductBlock(QWidget):
             if n > row:
                 self.product_row_mapping[key][1] -= 1
 
-    def calc_amount(self):
-        amount = Decimal(0.0)
+    @Slot()
+    def refresh_amount(self):
+        self.amount = Decimal("0.0")
+        self.count = 0
         for value in self.product_row_mapping.values():
-            amount += value[0].amount
-        return amount
+            self.amount += value[0].amount
+            self.count += value[0].quantity
+        print(self.count)
+        self.count_label.setText(f"总数：{self.count}")
+        self.amount_label.setText(f"总金额：{self.amount}")
