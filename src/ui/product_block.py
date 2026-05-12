@@ -60,9 +60,15 @@ class ProductBlock(QWidget):
     @Slot()
     def add_product_from_scan(self):
         try:
-            # 判断输入是否只有空白字符
-            product_udi = self.scan_input.text().strip()
+            # 判断输入是否只有空白字符，或者是无效的gs1
+            product_udi = self.scan_input.text().strip()    #判断空字符
+            new_product = Product(product_udi)
             if not product_udi:
+                print("a")
+                return
+            elif not new_product.is_gs1:    #判断是否有效GS1码
+                print("b")
+                QMessageBox.warning(self, "无效条码", "无效的产品GS1码，请重新扫入")
                 return
             
             # 检查新添加是否已存在
@@ -72,15 +78,10 @@ class ProductBlock(QWidget):
                 # 获取当前数量控件的值并增加1
                 spin_box = self.table.cellWidget(row-1, 3)
                 # 若有这个控件，数量+1
-                if spin_box:
+                if isinstance(spin_box, QSpinBox):
                     new_quantity = spin_box.value() + 1
                     spin_box.setValue(new_quantity)
             else:
-                # 添加产品,判断是否有效GS1码
-                new_product = Product(product_udi)
-                if not new_product.is_gs1:
-                    QMessageBox.warning(self, "无效条码", "无效的产品GS1码，请重新扫入")
-                    return
                 
                 # 添加新行
                 row = self.table.rowCount()

@@ -10,7 +10,7 @@ class Product:
         self.DEVICES_TABLE = pd.read_csv(PRODUCT_DATA_FPATH, index_col="最小销售单元产品标识",
                             header=0, dtype={"最小销售单元产品标识":str})
         self.is_gs1 = self.parse()
-        self.refresh_amount()
+        # self.refresh_amount()
 
     def parse(self):
         # 按GS1码解析产品代码
@@ -34,8 +34,8 @@ class Product:
         self.prod_date      = data.get("11")                                          # 生产日期
         self.quantity       = 0                                                       # 数量
         self.unit           = self.DEVICES_TABLE.at[self.gtin, "单位"]                      # 单位
-        self.unit_price     = Decimal(self.DEVICES_TABLE.at[self.gtin, "单价"])        # 单价
-        self.amount          = Decimal("0.0")                                          # 总价
+        self.unit_price     = Decimal(str(self.DEVICES_TABLE.at[self.gtin, "单价"]))        # 单价
+        self.amount          = self.quantity * self.unit_price                                         # 总价
         return True
 
     def refresh_amount(self):
