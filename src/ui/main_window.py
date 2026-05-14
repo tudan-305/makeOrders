@@ -51,6 +51,7 @@ class Mainwindow(QWidget):
 
     def connect_cross_signals(self):
         self.final_confirm.clicked.connect(self.on_final_confirm_clicked)
+        self.hosp_block.hosp_selected.connect(self.salemode_block.set_salemode)
 
     @Slot()
     def on_final_confirm_clicked(self):

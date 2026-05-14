@@ -19,17 +19,19 @@ class DictManager:
                 return {}
     
     def rank(self):
-        self.dict = dict(sorted(self.dict.items(), key = lambda item: item[0]))
+        self.dict = dict(sorted(self.dict.items(), key=lambda item: "".join(lazy_pinyin(item[0]))))
                     
     def save(self):
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(self.dict, f, ensure_ascii=False, indent=4)
 
-    def add(self, key:str, value:str):
+    def add(self, key:str, value:str, mode:list=[1, 1, 1]):
         if key in self.dict:
             return False
         else:
-            self.dict[key] = value
+            self.dict[key] = [value, mode]
+            self.rank()
+            self.save()
             return True
     
     def delete(self, key:str) -> bool:
@@ -42,7 +44,7 @@ class DictManager:
     def get_keys(self):
         return self.dict.keys()
     
-    def get_value(self, key:str) -> str:
+    def get_values(self, key:str) -> str:
         return self.dict.get(key, "")
     
 hosp_mapping = DictManager(config.HOSP_JSON_FPATH)

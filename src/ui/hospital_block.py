@@ -77,9 +77,8 @@ class AddhospDialog(QDialog):
     @Slot()
     def on_addbtn_clicked(self):
         dict_added = hosp_mapping.add(self.nickname.text(), self.holename.text())
+        print(f"self._was_modified: {self._was_modified}")
         if dict_added:
-            hosp_mapping.rank()
-            hosp_mapping.save()
             self._was_modified += 1
             self.show_status.setStyleSheet("color:green")
             notice = "添加成功"
@@ -92,7 +91,8 @@ class AddhospDialog(QDialog):
         
 
 class HospitalBlock(QWidget):
-    hosp_selected = Signal(str)
+    # 医院选中时，发射列表，用来设定salemode里面的供应商和出库方式等选项
+    hosp_selected = Signal(list)
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setup_ui()
@@ -125,8 +125,8 @@ class HospitalBlock(QWidget):
     def refresh_hosp_combo(self):
         """清空，然后重新添加dict里面的每项到qcombo，得到刷新效果"""
         self.hosp_combo.clear()
-        for nickname, holename in hosp_mapping.dict.items():
-            self.hosp_combo.addItem(nickname, holename)
+        for nickname, value in hosp_mapping.dict.items():
+            self.hosp_combo.addItem(nickname, value)
 
     def connect_signals(self):
         self.clear_btn.clicked.connect(self.on_clear_btn_clicked)
@@ -139,12 +139,19 @@ class HospitalBlock(QWidget):
 
     @Slot()
     def on_index_changed(self, index):
-        data = "" if index == -1 else self.hosp_combo.currentData()
+        if index == -1:
+            data = ""
+            data_signal = []
+            
+        else:
+            data = self.hosp_combo.currentData()[0]
+            data_signal = self.hosp_combo.currentData()[1]
         self.hosp_holename_lbl.setText(data)
+        self.hosp_selected.emit(data_signal)
 
     @Slot()
     def open_dialog(self):
         dialog = AddhospDialog()
-        result = dialog.exec()
+        dialog.exec()
         if dialog._was_modified > 0:
             self.refresh_hosp_combo()

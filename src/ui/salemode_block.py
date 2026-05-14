@@ -30,19 +30,19 @@ class SalemodeBlock(QWidget):
 
         row2 = QHBoxLayout()
         row2.addWidget(QLabel("出库方式：", fixedWidth=80))
-        for i in self.sale_modes:
+        for num, i in enumerate(self.sale_modes, 1):
             btn = QRadioButton(i)
             btn.setFixedWidth(55)
-            self.salemodes_group.addButton(btn)
+            self.salemodes_group.addButton(btn, num)
             row2.addWidget(btn)
         row2.addStretch()
 
         row3 = QHBoxLayout()
         row3.addWidget(QLabel("赠  品  单：", fixedWidth=80))
-        for i in self.order_modes:
+        for num, i in enumerate(self.order_modes, 1):
             btn = QRadioButton(i)
             btn.setFixedWidth(80)
-            self.ordermodes_group.addButton(btn)
+            self.ordermodes_group.addButton(btn, num)
             row3.addWidget(btn)
         row3.addStretch()
         
@@ -50,3 +50,33 @@ class SalemodeBlock(QWidget):
         layout.addLayout(row1)
         layout.addLayout(row2)
         layout.addLayout(row3)
+    
+    @Slot(list)
+    def set_salemode(self, hosp_info:list):
+        """根据医院信息设定salemode区块的选项"""
+        if hosp_info == []:
+            # 没有选中医院时，清空salemode区块的选项
+            group_list = [self.suppliers_group, self.salemodes_group, self.ordermodes_group]
+            for group in group_list:
+                group.setExclusive(False)
+                for btn in group.buttons():
+                    btn.setChecked(False)
+                group.setExclusive(True)
+            return
+        
+        supplier_id, sale_mode_id, order_mode_id = hosp_info
+        supplier_btn = self.suppliers_group.button(supplier_id)
+        if supplier_btn:
+            supplier_btn.setChecked(True)
+        else:
+            print(f"don't match supplier_id:{supplier_id}")
+        sale_mode_btn = self.salemodes_group.button(sale_mode_id)
+        if sale_mode_btn:
+            sale_mode_btn.setChecked(True)
+        else:
+            print(f"don't match sale_mode_id:{sale_mode_id}")
+        order_mode_id = self.ordermodes_group.button(sale_mode_id)
+        if order_mode_id:
+            order_mode_id.setChecked(True)
+        else:
+            print(f"don't match order_mode_id:{order_mode_id}")
