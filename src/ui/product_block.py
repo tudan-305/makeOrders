@@ -59,6 +59,7 @@ class ProductBlock(QWidget):
 
     @Slot()
     def add_product_from_scan(self):
+        """扫入产品识别gs1码以后，放入table"""
         try:
             # 判断输入是否只有空白字符，或者是无效的gs1
             product_udi = self.scan_input.text().strip()    #判断空字符
