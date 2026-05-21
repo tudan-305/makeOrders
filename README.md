@@ -10,7 +10,7 @@
 根目录下，执行python main.py
 
 ### 3.项目结构
-data/config.py 存放文件地址等信息
+config.py 存放文件地址等信息
 data/hospital_nams.json 存放医院名称映射
 data/udid_devices_alcon.csv 存放爱尔康产品信息
 

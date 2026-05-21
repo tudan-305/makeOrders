@@ -8,7 +8,7 @@ from src.ui.hospital_block import HospitalBlock
 from src.ui.salemode_block import SalemodeBlock
 from src.ui.product_block import ProductBlock
 from src.models.excel_manager import ExcelManager
-import data.config as config
+import config
 
 class Mainwindow(QWidget):
     def __init__(self, parent=None):
@@ -84,7 +84,7 @@ class Mainwindow(QWidget):
 
 
     def create_excel(self):
-        return ExcelManager(Path(config.TEMPLETES_FPATH) / f"{self.hosp_block.hosp_combo.currentText()}模板.xlsx")
+        return ExcelManager(config.TEMPLETES_FPATH / f"{self.hosp_block.hosp_combo.currentText()}模板.xlsx")
     
     def check_materials(self) -> bool:
         # 检查界面数据完整性

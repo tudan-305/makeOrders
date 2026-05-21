@@ -1,12 +1,11 @@
 import json
-from pathlib import Path
 from pypinyin import lazy_pinyin
-import data.config as config
+import config
 
 class DictManager:
-    def __init__(self, file_path:str):
+    def __init__(self, file_path):
         super().__init__()
-        self.file_path = Path(file_path)
+        self.file_path = file_path
         self.dict = self.load()
         self.rank()
         self.save()
@@ -23,7 +22,7 @@ class DictManager:
                     
     def save(self):
         with open(self.file_path, "w", encoding="utf-8") as f:
-            json.dump(self.dict, f, ensure_ascii=False, indent=4)
+            json.dump(self.dict, f, ensure_ascii=False, indent=2)
 
     def add(self, key:str, value:str, mode:list=[1, 1, 1]):
         if key in self.dict:

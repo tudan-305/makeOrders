@@ -1,6 +1,6 @@
 import biip
 import pandas as pd
-from data.config import PRODUCT_DATA_FPATH
+from config import PRODUCT_DATA_FPATH
 from decimal import Decimal
                             
 class Product:

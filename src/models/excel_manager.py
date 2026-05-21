@@ -1,5 +1,5 @@
+import config
 from datetime import date
-from pathlib import Path
 from openpyxl import load_workbook
 from openpyxl.styles import Border, Side, Alignment
 
@@ -156,5 +156,5 @@ class ExcelManager():
                 cell.alignment = Alignment(horizontal="center", vertical="center")
 
     def save(self, file_name):
-        self.wb.save(Path.home() / f"Desktop/{file_name}.xlsx")
+        self.wb.save(config.DESKTOP / "{file_name}.xlsx")
 
