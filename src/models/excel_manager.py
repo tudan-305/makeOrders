@@ -156,5 +156,5 @@ class ExcelManager():
                 cell.alignment = Alignment(horizontal="center", vertical="center")
 
     def save(self, file_name):
-        self.wb.save(config.DESKTOP / "{file_name}.xlsx")
+        self.wb.save(config.DESKTOP / f"{file_name}.xlsx")
 
