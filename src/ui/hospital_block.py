@@ -149,8 +149,11 @@ class AddhospDialog(QDialog):
         """医院删除按钮按下，取得选中行号，逆序排序， 先删后面避免索引改动"""
         rows = set(index.row() for index in self.table.selectedIndexes())
         rows = sorted(rows, reverse=True)
+        
         for row in rows:
+            key = self.table.item(row, 0).text()
             self.table.removeRow(row)
+            hosp_mapping.delete(key)
 
 
 class HospitalBlock(QWidget):
@@ -168,7 +171,7 @@ class HospitalBlock(QWidget):
         self.hosp_combo = QComboBox(placeholderText = "选择医院")
         self.clear_btn = QPushButton("清除")
         self.clear_btn.setFixedWidth(50)
-        self.add_hosp_btn = QPushButton("添加医院")
+        self.add_hosp_btn = QPushButton("增删医院")
         self.add_hosp_btn.setFixedWidth(100)
         row1.addWidget(self.hosp_combo)
         row1.addWidget(self.clear_btn)
