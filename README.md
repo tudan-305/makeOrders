@@ -17,7 +17,7 @@ data/udid_devices_alcon.csv 存放爱尔康产品信息
 src/models 存放字典管理，excel管理等组件
 src/ui 存放应用界面
 
-templetes/ 存放excel模板
+templates/ 存放excel模板
 
 tests/ 一些测试功能
 

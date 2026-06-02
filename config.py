@@ -14,6 +14,6 @@ ROOT_PATH = get_root_path()
 DESKTOP = Path().home() / "Desktop"
 PRODUCT_DATA_FPATH = ROOT_PATH / "data/udid_devices_alcon.csv"
 HOSP_JSON_FPATH = ROOT_PATH / "data/hospital_names.json"
-TEMPLETES_FPATH = ROOT_PATH / "templetes"
+TEMPLATES_FPATH = ROOT_PATH / "templates"
 
 
